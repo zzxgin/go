@@ -2,42 +2,39 @@ package main
 
 import (
 	"fmt"
-	"math"
-	"strconv"
+	"os"
 )
 
 func main() {
-	x, y := 10, 2
-	fmt.Println("输出：", x/y)
-	fmt.Println(math.Pi)
-	fmt.Println(5 | 4)
-
-	if v, e := strconv.Atoi("abc"); e == nil {
-		fmt.Println("转换成功：", v)
+	file, err := os.OpenFile("test.txt", os.O_RDONLY, 0700)
+	if err != nil {
+		fmt.Println("文件打开失败")
+		return
 	} else {
-		fmt.Println("转换失败：", e)
-	}
-	var day int
-	fmt.Print("请输入一个数字：")
-	fmt.Scan(&day)
-	switch day {
-	case 1:
-		fmt.Println("周一")
-	case 2, 3: // case多值匹配
-		fmt.Println("周二/周三")
-	default:
-		fmt.Println("其他")
-	}
+		data := make([]byte, 100)
+		for {
+			len, err := file.Read(data)
+			if len == 0 || err != nil {
+				break
+			}
+			fmt.Println("每次读取: ", string(data))
+		}
+		defer file.Close() // 关闭文件，释放资源
 
-	for i := 0; i < 5; i++ {
-		fmt.Println("循环：", i)
-	}
-	for {
-		fmt.Println("循环")
-		break
-	}
-	str := "Go语言"
-	for idx, char := range str {
-		fmt.Printf("索引：%d，字符：%c（Unicode值：%U）\n", idx, char, char)
 	}
 }
+
+/***
+go项目包管理方式：
+1、gopath
+早期的go项目环境是看gopath的设置，项目都要放在$GOPATH/src目录下， 下载的第三方包也放在$GOPATH/pkg目录下
+这种管理会造成多个项目混用，管理起来不方便，也不好控制版本
+
+2、go vender
+项目还是放在$GOPATH目录下面，引入了一个vendor可以进行不同项目的版本管理
+
+3、go mod
+a、项目工程目录可以放在GOPATH路径之外
+b、要求项目中必须要有go.mod文件，go.mod文件记录当前项目需要的第三方软件以及它的版本
+c、所有第三方依赖包都放在$GOPATH/pkg/mod 目录下
+***/
